@@ -5,7 +5,6 @@ Spring boot project
 
 dependencies:
 - JPA
-- Lombok
 - Spring Web
 - PostgreSql
 
