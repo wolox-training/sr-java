@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Data;
 
@@ -15,7 +16,8 @@ import lombok.Data;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "BOOK_SEQ")
+    @SequenceGenerator(name = "BOOK_SEQ",sequenceName = "BOOK_SEQ")
     private long id;
 
     @Column
