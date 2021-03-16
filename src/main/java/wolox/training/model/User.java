@@ -1,6 +1,8 @@
 package wolox.training.model;
 
 import com.sun.istack.NotNull;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +26,7 @@ import wolox.training.exceptions.BookAlReadyOwnedException;
 @Data
 @Entity
 @Table(name = "users")
+@ApiModel(description = "Users from the trainingApi")
 public class User {
 
     @Id
@@ -32,6 +35,7 @@ public class User {
 
     @NotNull
     @Column(nullable = false)
+    @ApiModelProperty(notes = "The username: could be srincon or sebastianr")
     private String username;
 
     @NotNull
