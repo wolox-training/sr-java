@@ -55,7 +55,7 @@ public class UserController {
      * @throws UserNotFoundException if there is no user associated with that username
      */
     @GetMapping("/username")
-    public ResponseEntity<User> findOneByAuthor(@RequestParam(name = "username") String username) {
+    public ResponseEntity<User> findByUsername(@RequestParam(name = "username") String username) {
         return ResponseEntity.ok(userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new));
     }
