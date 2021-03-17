@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import wolox.training.exceptions.BookNotFoundException;
@@ -49,14 +48,14 @@ public class UserController {
     /**
      * This method gets one {@link User} by username
      *
-     * @param username Username of the user (String)
+     * @param id id of the user (Long)
      *
      * @return got {@link User} for username.
      * @throws UserNotFoundException if there is no user associated with that username
      */
-    @GetMapping("/username")
-    public ResponseEntity<User> findByUsername(@RequestParam(name = "username") String username) {
-        return ResponseEntity.ok(userRepository.findByUsername(username)
+    @GetMapping("/{id}")
+    public ResponseEntity<User> findById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
     }
 
