@@ -55,20 +55,20 @@ public class UserController {
     /**
      * This method gets one {@link User} by username
      *
-     * @param username Username of the user (String)
+     * @param id id of the user (Long)
      *
      * @return got {@link User} for username.
      * @throws UserNotFoundException if there is no user associated with that username
      */
-    @GetMapping("/username")
-    @ApiOperation(value = "Giving an username, return the user", response = User.class)
+    @GetMapping("/{id}")
+    @ApiOperation(value = "Giving an id, return the user", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved user"),
             @ApiResponse(code = 400, message = "Something went wrong"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    public ResponseEntity<User> findOneByAuthor(@RequestParam(name = "username") String username) {
-        return ResponseEntity.ok(userRepository.findByUsername(username)
+    public ResponseEntity<User> findById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
     }
 
