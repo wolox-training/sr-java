@@ -31,18 +31,40 @@ public class BookController {
         this.bookRepository = bookRepository;
     }
 
+    /**
+     * this method get all {@link Book}
+     * @return got {@link List<Book> }
+     */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Book> findAll() {
         return bookRepository.findAll();
     }
 
+
+    /**
+     * This method gets one {@link Book} by name of author
+     *
+     * @param author Name of the book author (String)
+     *
+     * @return got {@link Book} for author.
+     * @throws BookNotFoundException if there is no book associated with that author
+     */
     @GetMapping("/author")
     public ResponseEntity<Book> findOneByAuthor(@RequestParam(name = "author") String author) {
         return ResponseEntity.ok(bookRepository.findByAuthor(author)
                 .orElseThrow(BookNotFoundException::new));
     }
 
+    /**
+     * This method creates an {@link Book} with the following parameters
+     *
+     * @param book: Representation the book like object (Book)
+     *
+     * @return created {@link ResponseEntity<Book>}.
+     * @throws BookException       if bad request the id belongs to a registered book
+     * @throws IllegalArgumentException if the Object book contain attr with values illegals
+     */
     @PostMapping
     public ResponseEntity<Book> create(@RequestBody Book book) {
         if (book.getId() != null && bookRepository.existsById(book.getId())) {
@@ -52,6 +74,17 @@ public class BookController {
                 .body(bookRepository.save(book));
     }
 
+    /**
+     * This method updates an {@link Book} with the following parameters
+     *
+     * @param id:   Identifier of book (long)
+     * @param book: Representation the book like object (Book)
+     *
+     * @return updated {@link ResponseEntity<Book>}.
+     * @throws BookNotFoundException if book not found on database
+     * @throws BookIdMismatchException if id path no math with id RequestBody (Book)
+     * @throws BookException         if the Object book contain attr with values illegals
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Book> update(@PathVariable long id, @RequestBody Book book) {
         try {
@@ -68,6 +101,11 @@ public class BookController {
         }
     }
 
+    /**
+     * This method deletes an {@link Book} with the attribute:
+     *
+     * @param id: Identifier of book (long)
+     */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id) {
 
