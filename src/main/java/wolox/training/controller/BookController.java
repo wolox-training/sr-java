@@ -1,12 +1,5 @@
 package wolox.training.controller;
 
-import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
-import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
-import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
-import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_BOOK;
-import static wolox.training.constants.MessageSwagger.SUCCESS_GET_BOOK;
-import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_BOOK;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,9 +24,11 @@ import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.model.Book;
 import wolox.training.repository.BookRepository;
 
+import static wolox.training.constants.MessageSwagger.*;
+
 @RestController
 @RequestMapping("/api/books")
-@Api(value = "Books", tags = {"Books"})
+@Api(value = TAGS_BOOK, tags = {TAGS_BOOK})
 public class BookController {
 
     private final BookRepository bookRepository;

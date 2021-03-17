@@ -11,6 +11,8 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import static wolox.training.constants.MessageSwagger.*;
+
 
 @Configuration
 @EnableSwagger2
@@ -28,14 +30,14 @@ public class SwaggerConfig {
 
     private ApiInfo apiEndPointsInfo() {
         return new ApiInfoBuilder()
-                .title("Training API")
-                .description("REST API training wolox")
+                .title(API_INFO_TITLE)
+                .description(API_INFO_DESCRIPTION)
 
                 .contact(
-                        new Contact("Johamn Sebastian Rincon Agredo",
-                                "https://github.com/sebas97-stack",
-                                "sebastian.rincon@wolox.co"))
-                .version("1.0.0")
+                        new Contact(API_INFO_CONTACT_NAME,
+                                API_INFO_CONTACT_LINK,
+                                API_INFO_CONTACT_EMAIL))
+                .version(API_INFO_VERSION)
                 .build();
     }
 
