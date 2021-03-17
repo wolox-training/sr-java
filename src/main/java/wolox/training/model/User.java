@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -52,7 +53,7 @@ public class User {
     @JoinTable(name = "user_book",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"))
-    private List<Book> books;
+    private List<Book> books = new ArrayList<>();
 
     public List<Book> getBooks() {
         return Collections.unmodifiableList(books);
@@ -68,4 +69,5 @@ public class User {
     public void removeBook(long idBook) {
         books.removeIf(book -> book.getId() == idBook);
     }
+
 }
