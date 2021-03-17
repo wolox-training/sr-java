@@ -1,5 +1,14 @@
 package wolox.training.controller;
 
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_ADD_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import wolox.training.exceptions.BookNotFoundException;
@@ -63,10 +71,10 @@ public class UserController {
     @GetMapping("/{id}")
     @ApiOperation(value = "Giving an id, return the user", response = User.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully retrieved user"),
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 200, message = SUCCESS_GET_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> findById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
@@ -84,9 +92,9 @@ public class UserController {
     @PostMapping
     @ApiOperation(value = "creates user", response = User.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully created user"),
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 201, message = SUCCESS_CREATE_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> create(@RequestBody User user) {
         if (user.getId() != null) {
             throw new UserException("for the creation request the id field must be null");
@@ -109,10 +117,10 @@ public class UserController {
     @PutMapping("/{id}")
     @ApiOperation(value = "updates user", response = User.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully updated user"),
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 200, message = SUCCESS_UPDATE_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> update(@PathVariable long id, @RequestBody User user) {
         try {
             if (user.getId() != id) {
@@ -138,9 +146,9 @@ public class UserController {
     @DeleteMapping("/{id}")
     @ApiOperation(value = "deletes user")
     @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public void delete(@PathVariable long id) {
 
         userRepository.findById(id)
@@ -161,10 +169,10 @@ public class UserController {
     @PatchMapping("/{id}/add_book/{idBook}")
     @ApiOperation(value = "add book to a user' collection", response = User.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully added book"),
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 200, message = SUCCESS_ADD_BOOKS_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> addBook(@PathVariable long id, @PathVariable long idBook) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.addBook(bookRepository.findById(idBook).orElseThrow(BookNotFoundException::new));
@@ -184,10 +192,10 @@ public class UserController {
     @PatchMapping("/{id}/remove_book/{idBook}")
     @ApiOperation(value = "remove book from a user' collection", response = User.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully removed book"),
-            @ApiResponse(code = 400, message = "Something went wrong"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+            @ApiResponse(code = 200, message = SUCCESS_REMOVE_BOOKS_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> removeBook(@PathVariable long id, @PathVariable long idBook) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.removeBook(idBook);
