@@ -7,7 +7,16 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.exceptions.UserException;
 import wolox.training.exceptions.UserIdMismatchException;
@@ -18,7 +27,15 @@ import wolox.training.repository.UserRepository;
 
 import java.util.List;
 
-import static wolox.training.constants.MessageSwagger.*;
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_ADD_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
+import static wolox.training.constants.MessageSwagger.TAGS_USER;
 
 @RestController
 @RequestMapping("/api/users")

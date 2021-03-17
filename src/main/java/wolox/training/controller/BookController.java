@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,15 @@ import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.model.Book;
 import wolox.training.repository.BookRepository;
 
-import static wolox.training.constants.MessageSwagger.*;
+import java.util.List;
+
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_BOOK;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_BOOK;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_BOOK;
+import static wolox.training.constants.MessageSwagger.TAGS_BOOK;
 
 @RestController
 @RequestMapping("/api/books")
@@ -40,6 +47,7 @@ public class BookController {
 
     /**
      * this method get all {@link Book}
+     *
      * @return got {@link List<Book> }
      */
     @GetMapping
@@ -54,7 +62,6 @@ public class BookController {
      * This method gets one {@link Book} by name of author
      *
      * @param author Name of the book author (String)
-     *
      * @return got {@link Book} for author.
      * @throws BookNotFoundException if there is no book associated with that author
      */
@@ -74,9 +81,8 @@ public class BookController {
      * This method creates an {@link Book} with the following parameters
      *
      * @param book: Representation the book like object (Book)
-     *
      * @return created {@link ResponseEntity<Book>}.
-     * @throws BookException       if bad request the id belongs to a registered book
+     * @throws BookException            if bad request the id belongs to a registered book
      * @throws IllegalArgumentException if the Object book contain attr with values illegals
      */
     @PostMapping
@@ -98,11 +104,10 @@ public class BookController {
      *
      * @param id:   Identifier of book (long)
      * @param book: Representation the book like object (Book)
-     *
      * @return updated {@link ResponseEntity<Book>}.
-     * @throws BookNotFoundException if book not found on database
+     * @throws BookNotFoundException   if book not found on database
      * @throws BookIdMismatchException if id path no math with id RequestBody (Book)
-     * @throws BookException         if the Object book contain attr with values illegals
+     * @throws BookException           if the Object book contain attr with values illegals
      */
     @PutMapping("/{id}")
     @ApiOperation(value = "updates book", response = Book.class)

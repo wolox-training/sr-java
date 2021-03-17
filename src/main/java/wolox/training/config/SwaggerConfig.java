@@ -11,7 +11,12 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import static wolox.training.constants.MessageSwagger.*;
+import static wolox.training.constants.MessageSwagger.API_INFO_CONTACT_EMAIL;
+import static wolox.training.constants.MessageSwagger.API_INFO_CONTACT_LINK;
+import static wolox.training.constants.MessageSwagger.API_INFO_CONTACT_NAME;
+import static wolox.training.constants.MessageSwagger.API_INFO_DESCRIPTION;
+import static wolox.training.constants.MessageSwagger.API_INFO_TITLE;
+import static wolox.training.constants.MessageSwagger.API_INFO_VERSION;
 
 
 @Configuration
