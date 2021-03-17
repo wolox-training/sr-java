@@ -1,5 +1,16 @@
 package wolox.training.controller;
 
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_BOOK;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_BOOK;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_BOOK;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +33,7 @@ import wolox.training.repository.BookRepository;
 
 @RestController
 @RequestMapping("/api/books")
+@Api(value = "Books", tags = {"Books"})
 public class BookController {
 
     private final BookRepository bookRepository;
@@ -36,6 +48,7 @@ public class BookController {
      * @return got {@link List<Book> }
      */
     @GetMapping
+    @ApiOperation(value = "return books", response = Book.class)
     @ResponseStatus(HttpStatus.OK)
     public List<Book> findAll() {
         return bookRepository.findAll();
@@ -51,6 +64,12 @@ public class BookController {
      * @throws BookNotFoundException if there is no book associated with that author
      */
     @GetMapping("/author")
+    @ApiOperation(value = "Giving an author, return the book", response = Book.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_GET_BOOK),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<Book> findOneByAuthor(@RequestParam(name = "author") String author) {
         return ResponseEntity.ok(bookRepository.findByAuthor(author)
                 .orElseThrow(BookNotFoundException::new));
@@ -66,6 +85,11 @@ public class BookController {
      * @throws IllegalArgumentException if the Object book contain attr with values illegals
      */
     @PostMapping
+    @ApiOperation(value = "creates book", response = Book.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = SUCCESS_CREATE_BOOK),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<Book> create(@RequestBody Book book) {
         if (book.getId() != null && bookRepository.existsById(book.getId())) {
             throw new BookException("bad request the id belongs to a registered book");
@@ -86,6 +110,12 @@ public class BookController {
      * @throws BookException         if the Object book contain attr with values illegals
      */
     @PutMapping("/{id}")
+    @ApiOperation(value = "updates book", response = Book.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_UPDATE_BOOK),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<Book> update(@PathVariable long id, @RequestBody Book book) {
         try {
             if (book.getId() != id) {
@@ -107,6 +137,11 @@ public class BookController {
      * @param id: Identifier of book (long)
      */
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "deletes book")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public void delete(@PathVariable long id) {
 
         bookRepository.findById(id)
