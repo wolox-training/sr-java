@@ -69,10 +69,6 @@ class UserControllerTest {
         userList.add(testUser);
         CONTENT_WITHOUT_ID = "{\"id\": null,\"username\": \"srincon\", \"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
         CONTENT = "{\"id\": 1,\"username\": \"srincon\", \"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
-        User testUserWithoutBooks = new User();
-        testUserWithoutBooks.setName("Sebastian Rincón");
-        testUserWithoutBooks.setUsername("srincon");
-        testUserWithoutBooks.setBirthdate(LocalDate.parse("1997-06-05"));
 
     }
 
@@ -89,7 +85,7 @@ class UserControllerTest {
     }
 
     @Test
-    void whenFindAll_thenNoUserExit() throws Exception {
+    void whenFindAll_thenNoUserExist() throws Exception {
         when(mockUserRepository.findAll()).thenReturn(Collections.emptyList());
         mvc.perform(get("/api/users")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -98,10 +94,10 @@ class UserControllerTest {
     }
 
     @Test
-    void whenFindOneByUsername_thenUserIsReturned() throws Exception {
-        when(mockUserRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
+    void whenFindById_thenUserIsReturned() throws Exception {
+        when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
-        mvc.perform(get("/api/users/username?username=srincon")
+        mvc.perform(get("/api/users/1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(testUser.getName())))
@@ -109,10 +105,10 @@ class UserControllerTest {
     }
 
     @Test
-    void whenFindOneByUsername_thenNotFound() throws Exception {
-        when(mockUserRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.empty());
+    void whenFindById_thenNotFound() throws Exception {
+        when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(get("/api/users/username?username=srincon")
+        mvc.perform(get("/api/users/2")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
