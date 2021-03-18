@@ -1,6 +1,9 @@
 package wolox.training.controller;
 
-import java.util.List;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +25,21 @@ import wolox.training.model.User;
 import wolox.training.repository.BookRepository;
 import wolox.training.repository.UserRepository;
 
+import java.util.List;
+
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_ADD_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
+import static wolox.training.constants.MessageSwagger.TAGS_USER;
+
 @RestController
 @RequestMapping("/api/users")
+@Api(value = TAGS_USER, tags = {TAGS_USER})
 public class UserController {
 
     private final UserRepository userRepository;
@@ -40,6 +56,7 @@ public class UserController {
      * This method gets list of {@link User}
      */
     @GetMapping
+    @ApiOperation(value = "return users", response = User.class)
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAll() {
         return userRepository.findAll();
@@ -49,11 +66,16 @@ public class UserController {
      * This method gets one {@link User} by username
      *
      * @param id id of the user (Long)
-     *
      * @return got {@link User} for username.
      * @throws UserNotFoundException if there is no user associated with that username
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "Giving an id, return the user", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_GET_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> findById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
@@ -63,12 +85,16 @@ public class UserController {
      * This method creates an {@link User} with the following parameters
      *
      * @param user: Representation the user like object (User)
-     *
      * @return created {@link ResponseEntity<User>}.
      * @throws UserException            if id field is not null
      * @throws IllegalArgumentException if the Object book contain attr with values illegals
      */
     @PostMapping
+    @ApiOperation(value = "creates user", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = SUCCESS_CREATE_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> create(@RequestBody User user) {
         if (user.getId() != null) {
             throw new UserException("for the creation request the id field must be null");
@@ -82,13 +108,18 @@ public class UserController {
      *
      * @param id:   Identifier of user (long)
      * @param user: Representation the user like object (User)
-     *
      * @return updated {@link ResponseEntity<User>}.
      * @throws UserNotFoundException   if user not found on database
      * @throws UserIdMismatchException if id path no math with id RequestBody (User)
      * @throws UserException           if the Object user contain attr with values illegals
      */
     @PutMapping("/{id}")
+    @ApiOperation(value = "updates user", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_UPDATE_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> update(@PathVariable long id, @RequestBody User user) {
         try {
             if (user.getId() != id) {
@@ -108,10 +139,14 @@ public class UserController {
      * This method deletes an {@link User} with the attribute:
      *
      * @param id: Identifier of user (long)
-     *
      * @throws UserNotFoundException if user not found on database
      */
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "deletes user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public void delete(@PathVariable long id) {
 
         userRepository.findById(id)
@@ -124,12 +159,17 @@ public class UserController {
      *
      * @param id:     Identifier of user (long)
      * @param idBook: Identifier of book (long)
-     *
      * @return got {@link User} updated
      * @throws UserNotFoundException if user not found on database
      * @throws BookNotFoundException if book not found on database
      */
     @PatchMapping("/{id}/add_book/{idBook}")
+    @ApiOperation(value = "add book to a user' collection", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_ADD_BOOKS_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> addBook(@PathVariable long id, @PathVariable long idBook) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.addBook(bookRepository.findById(idBook).orElseThrow(BookNotFoundException::new));
@@ -142,11 +182,16 @@ public class UserController {
      *
      * @param id:     Identifier of user (long)
      * @param idBook: Identifier of book (long)
-     *
      * @return got {@link User} updated
      * @throws UserNotFoundException if user not found on database
      */
     @PatchMapping("/{id}/remove_book/{idBook}")
+    @ApiOperation(value = "remove book from a user' collection", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_REMOVE_BOOKS_USER),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> removeBook(@PathVariable long id, @PathVariable long idBook) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.removeBook(idBook);

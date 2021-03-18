@@ -1,8 +1,9 @@
 package wolox.training.repository;
 
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import wolox.training.model.User;
+
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
