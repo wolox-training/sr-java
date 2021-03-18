@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import wolox.training.factory.BookFactory;
@@ -29,10 +30,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static wolox.training.factory.DataTestConstants.AUTH_PASSWORD;
+import static wolox.training.factory.DataTestConstants.AUTH_USERNAME;
+import static wolox.training.factory.DataTestConstants.PASSWORD_CONTENT;
+import static wolox.training.factory.DataTestConstants.PASSWORD_WRONG_CONTENT;
 import static wolox.training.factory.DataTestConstants.USER_CONTENT;
 import static wolox.training.factory.DataTestConstants.USER_CONTENT_WITHOUT_ID;
 
@@ -44,6 +50,8 @@ class UserControllerTest {
     public static final String API_USERS = "/api/users";
     public static final String API_USERS_1 = "/api/users/1";
     public static final String API_USERS_2 = "/api/users/2";
+    public static final String API_USERS_2_PASSWORD = "/api/users/2/change_password";
+
     private final List<User> userList = new ArrayList<>();
     private User testUser;
     @Autowired
@@ -60,6 +68,7 @@ class UserControllerTest {
         userList.add(testUser);
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindAll_thenUsersIsReturned() throws Exception {
         when(mockUserRepository.findAll()).thenReturn(userList);
@@ -72,6 +81,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[0].username", is(testUser.getUsername())));
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindAll_thenNoUserExist() throws Exception {
         when(mockUserRepository.findAll()).thenReturn(Collections.emptyList());
@@ -81,6 +91,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$", hasSize(0)));
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindById_thenUserIsReturned() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
@@ -92,6 +103,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.username", is(testUser.getUsername())));
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindById_thenNotFound() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -123,6 +135,7 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenUpdatedUser_thenUserIsPersisted() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
@@ -137,6 +150,7 @@ class UserControllerTest {
 
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -147,6 +161,7 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenUpdatedUserWithIdNotMismatch_thenThrowException() throws Exception {
 
@@ -156,6 +171,7 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenDeleteUser_thenUserIsDeleted() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
@@ -169,6 +185,7 @@ class UserControllerTest {
 
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenDeleteUserNotExist_thenThrowException() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -178,5 +195,29 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+    @Test
+    void whenChangePasswordNotMatch_thenThrowException() throws Exception {
+        when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
+        mvc.perform(patch(API_USERS_2_PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(PASSWORD_WRONG_CONTENT))
+                .andExpect(status().isBadRequest());
+    }
+
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+    @Test
+    void whenChangePassword_thenPasswordIsPersisted() throws Exception {
+        when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
+
+        mvc.perform(patch(API_USERS_2_PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(PASSWORD_CONTENT))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(testUser.getName())))
+                .andExpect(jsonPath("$.username", is(testUser.getUsername())))
+                .andExpect(jsonPath("$.password", is(testUser.getPassword())));
+    }
 }
