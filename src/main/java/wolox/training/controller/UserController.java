@@ -17,6 +17,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -44,10 +45,13 @@ public class UserController {
 
     private final BookRepository bookRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public UserController(UserRepository userRepository, BookRepository bookRepository) {
+    public UserController(UserRepository userRepository, BookRepository bookRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -99,6 +103,8 @@ public class UserController {
         if (user.getId() != null) {
             throw new UserException("for the creation request the id field must be null");
         }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userRepository.save(user));
     }

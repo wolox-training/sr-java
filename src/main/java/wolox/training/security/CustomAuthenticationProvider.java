@@ -5,14 +5,21 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 import wolox.training.repository.UserRepository;
 
 import java.util.Collections;
 
+@Component
 public class CustomAuthenticationProvider implements UserDetailsService {
 
-    @Autowired
+    private final
     UserRepository userRepository;
+
+    @Autowired
+    public CustomAuthenticationProvider(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
