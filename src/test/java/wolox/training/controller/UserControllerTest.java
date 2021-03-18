@@ -1,5 +1,26 @@
 package wolox.training.controller;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import wolox.training.factory.BookFactory;
+import wolox.training.factory.UserFactory;
+import wolox.training.model.Book;
+import wolox.training.model.User;
+import wolox.training.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,34 +33,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import wolox.training.model.Book;
-import wolox.training.model.User;
-import wolox.training.repository.UserRepository;
+import static wolox.training.factory.DataTestConstants.USER_CONTENT;
+import static wolox.training.factory.DataTestConstants.USER_CONTENT_WITHOUT_ID;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
 
+    public static final String API_USERS = "/api/users";
+    public static final String API_USERS_1 = "/api/users/1";
+    public static final String API_USERS_2 = "/api/users/2";
     private final List<User> userList = new ArrayList<>();
-    private String CONTENT_WITHOUT_ID;
-    private String CONTENT;
     private User testUser;
     @Autowired
     private MockMvc mvc;
@@ -49,34 +54,17 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        Book testBook = new Book();
-        testBook.setGenre("Mystery");
-        testBook.setAuthor("Dan Brown");
-        testBook.setImage("https://upload.wikimedia.org/wikipedia/en/b/bb/Inferno-cover.jpg");
-        testBook.setTitle("Inferno");
-        testBook.setSubtitle("Robert Langdon series");
-        testBook.setPublisher("Doubleday");
-        testBook.setYear("2013");
-        testBook.setPages("642");
-        testBook.setIsbn("978-0-385-53785-8");
-
-        testUser = new User();
-        testUser.setName("Sebastian Rincón");
-        testUser.setUsername("srincon");
-        testUser.setBirthdate(LocalDate.parse("1997-06-05"));
+        Book testBook = new BookFactory().newInstance();
+        testUser = new UserFactory().newInstance();
         testUser.addBook(testBook);
-
         userList.add(testUser);
-        CONTENT_WITHOUT_ID = "{\"id\": null,\"username\": \"srincon\", \"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
-        CONTENT = "{\"id\": 1,\"username\": \"srincon\", \"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
-
     }
 
     @Test
     void whenFindAll_thenUsersIsReturned() throws Exception {
         when(mockUserRepository.findAll()).thenReturn(userList);
 
-        mvc.perform(get("/api/users")
+        mvc.perform(get(API_USERS)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -87,7 +75,7 @@ class UserControllerTest {
     @Test
     void whenFindAll_thenNoUserExist() throws Exception {
         when(mockUserRepository.findAll()).thenReturn(Collections.emptyList());
-        mvc.perform(get("/api/users")
+        mvc.perform(get(API_USERS)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -97,7 +85,7 @@ class UserControllerTest {
     void whenFindById_thenUserIsReturned() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
-        mvc.perform(get("/api/users/1")
+        mvc.perform(get(API_USERS_1)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(testUser.getName())))
@@ -108,7 +96,7 @@ class UserControllerTest {
     void whenFindById_thenNotFound() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(get("/api/users/2")
+        mvc.perform(get(API_USERS_2)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -117,9 +105,9 @@ class UserControllerTest {
     void whenCreateUser_thenUserIsPersisted() throws Exception {
         when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
 
-        mvc.perform(post("/api/users")
+        mvc.perform(post(API_USERS)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(CONTENT_WITHOUT_ID))
+                .content(USER_CONTENT_WITHOUT_ID))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(testUser.getName())))
                 .andExpect(jsonPath("$.username", is(testUser.getUsername())));
@@ -129,9 +117,9 @@ class UserControllerTest {
     void whenCreateUserWithId_thenThrowException() throws Exception {
         when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
 
-        mvc.perform(post("/api/users")
+        mvc.perform(post(API_USERS)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(CONTENT))
+                .content(USER_CONTENT))
                 .andExpect(status().isBadRequest());
     }
 
@@ -140,9 +128,9 @@ class UserControllerTest {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
 
-        mvc.perform(put("/api/users/1")
+        mvc.perform(put(API_USERS_1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(CONTENT))
+                .content(USER_CONTENT))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(testUser.getName())))
                 .andExpect(jsonPath("$.username", is(testUser.getUsername())));
@@ -153,18 +141,18 @@ class UserControllerTest {
     void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(put("/api/users/1")
+        mvc.perform(put(API_USERS_1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(CONTENT))
+                .content(USER_CONTENT))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void whenUpdatedUserWithIdNotMismatch_thenThrowException() throws Exception {
 
-        mvc.perform(put("/api/users/2")
+        mvc.perform(put(API_USERS_2)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(CONTENT))
+                .content(USER_CONTENT))
                 .andExpect(status().isBadRequest());
     }
 
@@ -172,7 +160,7 @@ class UserControllerTest {
     void whenDeleteUser_thenUserIsDeleted() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
-        mvc.perform(delete("/api/users/1")
+        mvc.perform(delete(API_USERS_1)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -185,7 +173,7 @@ class UserControllerTest {
     void whenDeleteUserNotExist_thenThrowException() throws Exception {
         when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(delete("/api/users/1")
+        mvc.perform(delete(API_USERS_1)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

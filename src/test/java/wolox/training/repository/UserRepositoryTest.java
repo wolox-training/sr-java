@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import wolox.training.factory.UserFactory;
 import wolox.training.model.User;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -29,40 +29,34 @@ class UserRepositoryTest {
     @BeforeEach
     void setUp() {
 
-        testUser = new User();
-        testUser.setName("Sebastian Rincón");
-        testUser.setUsername("srincon");
-        testUser.setBirthdate(LocalDate.parse("1997-06-05"));
-
+        testUser = new UserFactory().newInstance();
     }
 
     @Test
     void whenSave_thenUserIsPersisted() {
         User persistedUser = userRepository.save(testUser);
 
-        assertThat(persistedUser.getUsername()
-                .equals(testUser.getUsername())).isTrue();
+        assertThat(persistedUser.getUsername())
+                .isEqualTo(testUser.getUsername());
 
-        assertThat(persistedUser.getName()
-                .equals(testUser.getName())).isTrue();
+        assertThat(persistedUser.getName())
+                .isEqualTo(testUser.getName());
 
-        assertThat(persistedUser.getBirthdate()
-                .equals(testUser.getBirthdate())).isTrue();
+        assertThat(persistedUser.getBirthdate())
+                .isEqualTo(testUser.getBirthdate());
 
-        assertThat(persistedUser.getBooks().size() == testUser.getBooks().size()).isTrue();
+        assertThat(persistedUser.getBooks().size()).isSameAs(testUser.getBooks().size());
     }
 
     @Test
     void whenSaveUserWithoutName_thenThrowException() {
         testUser.setName(null);
 
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.save(testUser);
-        });
+        Assertions.assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(testUser));
     }
 
     @Test
-    void whenGetAll_thenReturnUsers(){
+    void whenGetAll_thenReturnUsers() {
         assertThat(userRepository.findAll().size() > 0).isTrue();
     }
 }
