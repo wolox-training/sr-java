@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -236,6 +238,16 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(newPassword.getPassword()));
 
         return ResponseEntity.ok(userRepository.save(user));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getUserSecurityContext() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        return ResponseEntity.ok(userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new));
     }
 
 }
