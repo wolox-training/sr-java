@@ -22,6 +22,7 @@ import wolox.training.exceptions.BookIdMismatchException;
 import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.model.Book;
 import wolox.training.repository.BookRepository;
+import wolox.training.service.OpenLibraryService;
 
 import java.util.List;
 
@@ -40,9 +41,13 @@ public class BookController {
 
     private final BookRepository bookRepository;
 
+    private final OpenLibraryService openLibraryService;
+
+
     @Autowired
-    public BookController(BookRepository bookRepository) {
+    public BookController(BookRepository bookRepository, OpenLibraryService openLibraryService) {
         this.bookRepository = bookRepository;
+        this.openLibraryService = openLibraryService;
     }
 
     /**
@@ -148,5 +153,16 @@ public class BookController {
                 .orElseThrow(BookNotFoundException::new);
 
         bookRepository.deleteById(id);
+    }
+
+    @GetMapping("/isbn")
+    public ResponseEntity<Book> findByIsbn(@RequestParam("isbn") String isbn) {
+
+        return bookRepository.findBookByIsbn(isbn)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(bookRepository.save(openLibraryService.findBookByIsbn(isbn))
+                        ));
     }
 }
