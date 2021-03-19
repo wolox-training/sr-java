@@ -241,6 +241,11 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @ApiOperation(value = "get user logged in", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<User> getUserSecurityContext() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
