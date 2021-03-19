@@ -156,6 +156,13 @@ public class BookController {
     }
 
     @GetMapping("/isbn")
+    @ApiOperation(value = "Giving an isbn, return the book")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_GET_BOOK),
+            @ApiResponse(code = 201, message = SUCCESS_CREATE_BOOK),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
     public ResponseEntity<Book> findByIsbn(@RequestParam("isbn") String isbn) {
 
         return bookRepository.findBookByIsbn(isbn)
