@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import wolox.training.exceptions.BookNotFoundException;
@@ -30,6 +31,7 @@ import wolox.training.model.dto.PasswordDto;
 import wolox.training.repository.BookRepository;
 import wolox.training.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
@@ -254,5 +256,19 @@ public class UserController {
         return ResponseEntity.ok(userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new));
     }
+
+    @GetMapping("/")
+    @ApiOperation(value = "Giving an date_start, date_end and name_like, return the users", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
+    public ResponseEntity<List<User>> getUsersByBirthdateAndName(@RequestParam("date_star") LocalDate dateStart,
+                                                                 @RequestParam("date_end") LocalDate dateEnd,
+                                                                 @RequestParam("name_like") String nameCharacters) {
+
+        return ResponseEntity.ok(userRepository.findAllByBirthdateBetweenAndNameLike(dateStart, dateEnd, nameCharacters));
+    }
+
 
 }
