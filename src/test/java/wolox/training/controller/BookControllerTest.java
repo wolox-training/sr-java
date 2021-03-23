@@ -68,15 +68,15 @@ class BookControllerTest {
   @Test
   void whenFindAll_thenBooksIsReturned() throws Exception {
     when(mockBookRepository.findAllFilters(
-        anyString(),
-        anyString(),
-        anyString(),
-        anyString(),
-        anyString(),
-        anyString(),
-        anyString(),
-        anyString(),
-        anyLong()
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
     )).thenReturn(bookList);
 
     mvc.perform(get(API_BOOKS)
