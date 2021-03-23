@@ -33,6 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -73,24 +77,30 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindAll_thenUsersIsReturned() throws Exception {
-    when(mockUserRepository.findAll()).thenReturn(userList);
+    Page<User> pagedUsers = new PageImpl(userList);
+    when(mockUserRepository.findAll(any(Example.class), any(Pageable.class)))
+        .thenReturn(pagedUsers);
+    when(mockUserRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
 
     mvc.perform(get(API_USERS)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].name", is(testUser.getName())))
-        .andExpect(jsonPath("$[0].username", is(testUser.getUsername())));
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].name", is(testUser.getName())))
+        .andExpect(jsonPath("$.content[0].username", is(testUser.getUsername())));
   }
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindAll_thenNoUserExist() throws Exception {
-    when(mockUserRepository.findAll()).thenReturn(Collections.emptyList());
+    Page<User> pagedUsers = new PageImpl(Collections.emptyList());
+    when(mockUserRepository.findAll(any(Example.class), any(Pageable.class)))
+        .thenReturn(pagedUsers);
+    when(mockUserRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
     mvc.perform(get(API_USERS)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0)));
+        .andExpect(jsonPath("$.content", hasSize(0)));
   }
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)

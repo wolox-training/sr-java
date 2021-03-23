@@ -30,6 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -67,36 +71,38 @@ class BookControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindAll_thenBooksIsReturned() throws Exception {
-    when(mockBookRepository.findAllFilters(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    )).thenReturn(bookList);
+    Page<Book> pagedBooks = new PageImpl(bookList);
+
+    when(mockBookRepository.findAll(any(Example.class), any(Pageable.class)))
+        .thenReturn(pagedBooks);
+    when(mockBookRepository.findAll(any(Pageable.class)))
+        .thenReturn(pagedBooks);
 
     mvc.perform(get(API_BOOKS)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].author", is(testBook.getAuthor())))
-        .andExpect(jsonPath("$[0].genre", is(testBook.getGenre())))
-        .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
-        .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$.content[0].genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$.content[0].publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$.content[0].isbn", is(testBook.getIsbn())));
   }
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindAll_thenNoBooksExist() throws Exception {
+    Page<Book> pagedBooks = new PageImpl(Collections.emptyList());
+
+    when(mockBookRepository.findAll(any(Example.class), any(Pageable.class)))
+        .thenReturn(pagedBooks);
+    when(mockBookRepository.findAll(any(Pageable.class)))
+        .thenReturn(pagedBooks);
+
     when(mockBookRepository.findAll()).thenReturn(Collections.emptyList());
     mvc.perform(get(API_BOOKS)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0)));
+        .andExpect(jsonPath("$.content", hasSize(0)));
   }
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
