@@ -1,5 +1,9 @@
 package wolox.training.repository;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.time.LocalDate;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,53 +14,61 @@ import org.springframework.dao.DataIntegrityViolationException;
 import wolox.training.factory.UserFactory;
 import wolox.training.model.User;
 
-import javax.persistence.EntityManager;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest {
 
-    @Autowired
-    EntityManager entityManager;
+  @Autowired
+  EntityManager entityManager;
 
-    @Autowired
-    UserRepository userRepository;
+  @Autowired
+  UserRepository userRepository;
 
-    private User testUser;
+  private User testUser;
 
-    @BeforeEach
-    void setUp() {
+  @BeforeEach
+  void setUp() {
 
-        testUser = new UserFactory().newInstance();
-    }
+    testUser = new UserFactory().newInstance();
+  }
 
-    @Test
-    void whenSave_thenUserIsPersisted() {
-        User persistedUser = userRepository.save(testUser);
+  @Test
+  void whenSave_thenUserIsPersisted() {
+    User persistedUser = userRepository.save(testUser);
 
-        assertThat(persistedUser.getUsername())
-                .isEqualTo(testUser.getUsername());
+    assertThat(persistedUser.getUsername())
+        .isEqualTo(testUser.getUsername());
 
-        assertThat(persistedUser.getName())
-                .isEqualTo(testUser.getName());
+    assertThat(persistedUser.getName())
+        .isEqualTo(testUser.getName());
 
-        assertThat(persistedUser.getBirthdate())
-                .isEqualTo(testUser.getBirthdate());
+    assertThat(persistedUser.getBirthdate())
+        .isEqualTo(testUser.getBirthdate());
 
-        assertThat(persistedUser.getBooks().size()).isSameAs(testUser.getBooks().size());
-    }
+    assertThat(persistedUser.getBooks().size()).isSameAs(testUser.getBooks().size());
+  }
 
-    @Test
-    void whenSaveUserWithoutName_thenThrowException() {
-        testUser.setName(null);
+  @Test
+  void whenSaveUserWithoutName_thenThrowException() {
+    testUser.setName(null);
 
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(testUser));
-    }
+    Assertions
+        .assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(testUser));
+  }
 
-    @Test
-    void whenGetAll_thenReturnUsers() {
-        assertThat(userRepository.findAll().size() > 0).isTrue();
-    }
+  @Test
+  void whenGetAll_thenReturnUsers() {
+    assertThat(userRepository.findAll().size() > 0).isTrue();
+  }
+
+  @Test
+  void whenGetUsersByBirthdateAndName_thenReturnUsers() {
+    LocalDate dateStart = LocalDate.parse("2021-01-01");
+    LocalDate dateEnd = LocalDate.parse("2021-03-20");
+    String nameLike = "seb";
+    assertThat(
+        userRepository
+            .findAllByBirthdateBetweenAndNameContaining(dateStart, dateEnd, nameLike)
+            .size() > 0).isTrue();
+  }
 }

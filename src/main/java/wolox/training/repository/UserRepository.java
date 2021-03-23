@@ -11,5 +11,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    List<User> findAllByBirthdateBetweenAndNameLike(LocalDate startDate, LocalDate endDate, String sequenceCharacters);
+    List<User> findAllByBirthdateBetweenAndNameContaining(LocalDate startDate, LocalDate endDate, String sequenceCharacters);
 }
