@@ -10,13 +10,18 @@ import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
 import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
 import static wolox.training.constants.MessageSwagger.TAGS_USER;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +48,7 @@ import wolox.training.model.User;
 import wolox.training.model.dto.PasswordDto;
 import wolox.training.repository.BookRepository;
 import wolox.training.repository.UserRepository;
+import wolox.training.utils.PageableUtils;
 
 @RestController
 @RequestMapping("/api/users")
@@ -55,12 +61,18 @@ public class UserController {
 
   private final PasswordEncoder passwordEncoder;
 
+  private final PageableUtils pageableUtils;
+
+  private final ObjectMapper objectMapper;
+
   @Autowired
   public UserController(UserRepository userRepository, BookRepository bookRepository,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder, PageableUtils pageableUtils, ObjectMapper objectMapper) {
     this.userRepository = userRepository;
     this.bookRepository = bookRepository;
     this.passwordEncoder = passwordEncoder;
+    this.pageableUtils = pageableUtils;
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -69,8 +81,16 @@ public class UserController {
   @GetMapping
   @ApiOperation(value = "return users", response = User.class)
   @ResponseStatus(HttpStatus.OK)
-  public List<User> findAll() {
-    return userRepository.findAll();
+  public Iterable<User> findAll(@RequestParam Map<String, String> params) {
+    Pageable page = pageableUtils.paramsToPage(params);
+
+    if (params.size() == 0) {
+      return userRepository.findAll(page);
+    }
+    User userParams = objectMapper.convertValue(params, User.class);
+    ExampleMatcher userMatcherExample = ExampleMatcher.matching();
+    Example<User> userExample = Example.of(userParams, userMatcherExample);
+    return userRepository.findAll(userExample, page);
   }
 
   /**
