@@ -57,8 +57,20 @@ public class BookController {
   @GetMapping
   @ApiOperation(value = "return books", response = Book.class)
   @ResponseStatus(HttpStatus.OK)
-  public List<Book> findAll() {
-    return bookRepository.findAll();
+  public List<Book> getAllFilters(
+      @RequestParam(value = "id", required = false) Long id,
+      @RequestParam(value = "author", required = false) String author,
+      @RequestParam(value = "genre", required = false) String genre,
+      @RequestParam(value = "isbn", required = false) String isbn,
+      @RequestParam(value = "pages", required = false) String pages,
+      @RequestParam(value = "publisher", required = false) String publisher,
+      @RequestParam(value = "year", required = false) String year,
+      @RequestParam(value = "title", required = false) String title,
+      @RequestParam(value = "subtitle", required = false) String subtitle
+  ) {
+    return bookRepository.findAllFilters(
+        publisher, genre, year, author, title, subtitle, isbn, pages, id
+    );
   }
 
 
