@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/book?bibkeys=ISBN:0385472579&format=json&jscmd=data",
+    "queryParameters": {
+      "bibkeys": {
+        "equalTo": "ISBN:0385472579"
+      },
+      "format": {
+        "equalTo": "json"
+      },
+      "jscmd": {
+        "equalTo": "data"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "response_ok_book.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

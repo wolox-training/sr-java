@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import wolox.training.factory.BookFactory;
 import wolox.training.model.Book;
 import wolox.training.repository.BookRepository;
+import wolox.training.service.impl.OpenLibraryServiceImpl;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -49,6 +50,7 @@ class BookControllerTest {
 
   public static final String API_BOOKS = "/api/books";
   public static final String API_BOOKS_AUTHOR = "/api/books/author?author=Dan Brown";
+  public static final String API_BOOKS_ISBN = "/api/books/isbn?isbn=0385472579";
   public static final String API_BOOKS_1 = "/api/books/1";
   public static final String API_BOOKS_2 = "/api/books/2";
   public static final String API_BOOK_ADVANCE_METHOD = "/api/books/?publisher=Zhizhong Cai&genre=terror&year=1994";
@@ -118,6 +120,20 @@ class BookControllerTest {
         .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
         .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
   }
+
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenFindOneByIsbn_thenUserIsCreated() throws Exception {
+    when(mockBookRepository.findBookByIsbn(anyString())).thenReturn(Optional.empty());
+    mvc.perform(get(API_BOOKS_ISBN)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
+  }
+
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
