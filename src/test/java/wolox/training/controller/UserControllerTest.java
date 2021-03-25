@@ -1,27 +1,5 @@
 package wolox.training.controller;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import wolox.training.factory.BookFactory;
-import wolox.training.factory.UserFactory;
-import wolox.training.model.Book;
-import wolox.training.model.User;
-import wolox.training.repository.UserRepository;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,9 +16,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static wolox.training.factory.DataTestConstants.AUTH_PASSWORD;
 import static wolox.training.factory.DataTestConstants.AUTH_USERNAME;
 import static wolox.training.factory.DataTestConstants.PASSWORD_CONTENT;
+import static wolox.training.factory.DataTestConstants.PASSWORD_OLD_WRONG_CONTENT;
 import static wolox.training.factory.DataTestConstants.PASSWORD_WRONG_CONTENT;
 import static wolox.training.factory.DataTestConstants.USER_CONTENT;
 import static wolox.training.factory.DataTestConstants.USER_CONTENT_WITHOUT_ID;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import wolox.training.factory.BookFactory;
+import wolox.training.factory.UserFactory;
+import wolox.training.model.Book;
+import wolox.training.model.User;
+import wolox.training.repository.UserRepository;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -57,6 +58,9 @@ class UserControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @MockBean
     private UserRepository mockUserRepository;
 
@@ -64,6 +68,7 @@ class UserControllerTest {
     void setUp() {
         Book testBook = new BookFactory().newInstance();
         testUser = new UserFactory().newInstance();
+        testUser.setPassword(passwordEncoder.encode(testUser.getPassword()));
         testUser.addBook(testBook);
         userList.add(testUser);
     }
@@ -203,6 +208,17 @@ class UserControllerTest {
         mvc.perform(patch(API_USERS_2_PASSWORD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(PASSWORD_WRONG_CONTENT))
+                .andExpect(status().isBadRequest());
+    }
+
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+    @Test
+    void whenChangeOldPasswordNotMatch_thenThrowException() throws Exception {
+        when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+
+        mvc.perform(patch(API_USERS_2_PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(PASSWORD_OLD_WRONG_CONTENT))
                 .andExpect(status().isBadRequest());
     }
 

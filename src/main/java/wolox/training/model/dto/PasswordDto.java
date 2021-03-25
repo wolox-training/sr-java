@@ -7,6 +7,9 @@ import lombok.NonNull;
 public class PasswordDto {
 
     @NonNull
+    private  String oldPassword;
+
+    @NonNull
     private String password;
 
     @NonNull

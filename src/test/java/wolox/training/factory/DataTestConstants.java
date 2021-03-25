@@ -30,7 +30,8 @@ public interface DataTestConstants {
 
      static final String  USER_CONTENT_WITHOUT_ID = "{\"id\": null,\"username\": \"srincon\",\"password\": \"81943301Se/\", \"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
      static final String  USER_CONTENT = "{\"id\": 1,\"username\": \"srincon\", \"password\": \"81943301Se/\",\"name\": \"Sebastian Rincón\", \"birthdate\": \"2021-03-16T15:00:01.460Z\", \"books\":[]}";
-     static final String  PASSWORD_WRONG_CONTENT = "{\"password\": \"81943301Se\", \"verifiedPassword\": \"81943301Se/\"}";
-     static final String  PASSWORD_CONTENT = "{\"password\": \"81943301Se*\", \"verifiedPassword\": \"81943301Se*\"}";
+     static final String  PASSWORD_WRONG_CONTENT = "{\"password\": \"81943301Se\", \"verifiedPassword\": \"81943301Se/\", \"oldPassword\": \"81943301Se/\"}";
+     static final String  PASSWORD_OLD_WRONG_CONTENT = "{\"password\": \"81943301Se\", \"verifiedPassword\": \"81943301Se/\", \"oldPassword\": \"81943301Se/\"}";
+     static final String  PASSWORD_CONTENT = "{\"password\": \"81943301Se*\", \"verifiedPassword\": \"81943301Se*\", \"oldPassword\": \"81943301Se/\"}";
 
 }
