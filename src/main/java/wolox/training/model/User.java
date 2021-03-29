@@ -48,10 +48,6 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthdate;
 
-    @NotNull
-    @Column(nullable = false)
-    private String password;
-
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

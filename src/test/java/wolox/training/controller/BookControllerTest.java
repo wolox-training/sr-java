@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import wolox.training.factory.BookFactory;
@@ -32,8 +31,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static wolox.training.factory.DataTestConstants.AUTH_PASSWORD;
-import static wolox.training.factory.DataTestConstants.AUTH_USERNAME;
 import static wolox.training.factory.DataTestConstants.BOOK_CONTENT;
 import static wolox.training.factory.DataTestConstants.BOOK_CONTENT_WITHOUT_ID;
 
@@ -62,7 +59,6 @@ class BookControllerTest {
         bookList.add(testBook);
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindAll_thenBooksIsReturned() throws Exception {
         when(mockBookRepository.findAll()).thenReturn(bookList);
@@ -77,7 +73,6 @@ class BookControllerTest {
                 .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindAll_thenNoBooksExist() throws Exception {
         when(mockBookRepository.findAll()).thenReturn(Collections.emptyList());
@@ -87,7 +82,6 @@ class BookControllerTest {
                 .andExpect(jsonPath("$", hasSize(0)));
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindOneByAuthor_thenUserIsReturned() throws Exception {
         when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.of(testBook));
@@ -101,7 +95,6 @@ class BookControllerTest {
                 .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenFindOneByAuthor_thenNotFound() throws Exception {
         when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.empty());
@@ -125,7 +118,7 @@ class BookControllerTest {
                 .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+
     @Test
     void whenUpdatedUser_thenUserIsPersisted() throws Exception {
         when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
@@ -142,7 +135,6 @@ class BookControllerTest {
 
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
         when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -153,7 +145,6 @@ class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenUpdatedUserWithIdNotMismatch_thenThrowException() throws Exception {
 
@@ -163,7 +154,6 @@ class BookControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenDeleteUser_thenUserIsDeleted() throws Exception {
         when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
@@ -177,7 +167,6 @@ class BookControllerTest {
 
     }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
     @Test
     void whenDeleteUserNotExist_thenThrowException() throws Exception {
         when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
