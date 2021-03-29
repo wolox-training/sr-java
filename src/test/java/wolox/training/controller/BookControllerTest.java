@@ -1,26 +1,5 @@
 package wolox.training.controller;
 
-import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import wolox.training.factory.BookFactory;
-import wolox.training.model.Book;
-import wolox.training.repository.BookRepository;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,174 +19,203 @@ import static wolox.training.factory.DataTestConstants.BOOK_CONTENT;
 import static wolox.training.factory.DataTestConstants.BOOK_CONTENT_WITHOUT_ID;
 import static wolox.training.factory.DataTestConstants.PASSWORD_CONTENT;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import wolox.training.factory.BookFactory;
+import wolox.training.model.Book;
+import wolox.training.repository.BookRepository;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class BookControllerTest {
 
-    public static final String API_BOOKS = "/api/books";
-    public static final String API_BOOKS_AUTHOR = "/api/books/author?author=Dan Brown";
-    public static final String API_BOOKS_1 = "/api/books/1";
-    public static final String API_BOOKS_2 = "/api/books/2";
-    public static final String API_BOOK_ADVANCE_METHOD = "/api/books/?publisher=Zhizhong Cai&genre=terror&year=1994";
-    private final List<Book> bookList = new ArrayList<>();
+  public static final String API_BOOKS = "/api/books";
+  public static final String API_BOOKS_AUTHOR = "/api/books/author?author=Dan Brown";
+  public static final String API_BOOKS_1 = "/api/books/1";
+  public static final String API_BOOKS_2 = "/api/books/2";
+  public static final String API_BOOK_ADVANCE_METHOD = "/api/books/?publisher=Zhizhong Cai&genre=terror&year=1994";
+  private final List<Book> bookList = new ArrayList<>();
 
-    private Book testBook;
+  private Book testBook;
 
-    @Autowired
-    private MockMvc mvc;
+  @Autowired
+  private MockMvc mvc;
 
-    @MockBean
-    private BookRepository mockBookRepository;
+  @MockBean
+  private BookRepository mockBookRepository;
 
-    @BeforeEach
-    void setUp() {
-        testBook = new BookFactory().newInstance();
-        bookList.add(testBook);
-    }
+  @BeforeEach
+  void setUp() {
+    testBook = new BookFactory().newInstance();
+    bookList.add(testBook);
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenFindAll_thenBooksIsReturned() throws Exception {
-        when(mockBookRepository.findAll()).thenReturn(bookList);
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenFindAll_thenBooksIsReturned() throws Exception {
+    when(mockBookRepository.findAllFilters(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    )).thenReturn(bookList);
 
-        mvc.perform(get(API_BOOKS)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].author", is(testBook.getAuthor())))
-                .andExpect(jsonPath("$[0].genre", is(testBook.getGenre())))
-                .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
-                .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
-    }
+    mvc.perform(get(API_BOOKS)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$[0].genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenFindAll_thenNoBooksExist() throws Exception {
-        when(mockBookRepository.findAll()).thenReturn(Collections.emptyList());
-        mvc.perform(get(API_BOOKS)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
-    }
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenFindAll_thenNoBooksExist() throws Exception {
+    when(mockBookRepository.findAll()).thenReturn(Collections.emptyList());
+    mvc.perform(get(API_BOOKS)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(0)));
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenFindOneByAuthor_thenUserIsReturned() throws Exception {
-        when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.of(testBook));
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenFindOneByAuthor_thenUserIsReturned() throws Exception {
+    when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.of(testBook));
 
-        mvc.perform(get(API_BOOKS_AUTHOR)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
-                .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
-                .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
-                .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
-    }
+    mvc.perform(get(API_BOOKS_AUTHOR)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenFindOneByAuthor_thenNotFound() throws Exception {
-        when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.empty());
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenFindOneByAuthor_thenNotFound() throws Exception {
+    when(mockBookRepository.findByAuthor(testBook.getAuthor())).thenReturn(Optional.empty());
 
-        mvc.perform(get(API_BOOKS_AUTHOR)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
+    mvc.perform(get(API_BOOKS_AUTHOR)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
 
-    @Test
-    void whenCreateBook_thenBookIsPersisted() throws Exception {
-        when(mockBookRepository.save(any(Book.class))).thenReturn(testBook);
+  @Test
+  void whenCreateBook_thenBookIsPersisted() throws Exception {
+    when(mockBookRepository.save(any(Book.class))).thenReturn(testBook);
 
-        mvc.perform(post(API_BOOKS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(BOOK_CONTENT_WITHOUT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
-                .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
-                .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
-                .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
-    }
+    mvc.perform(post(API_BOOKS)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(BOOK_CONTENT_WITHOUT_ID))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenUpdatedUser_thenUserIsPersisted() throws Exception {
-        when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
-        when(mockBookRepository.save(any(Book.class))).thenReturn(testBook);
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenUpdatedUser_thenUserIsPersisted() throws Exception {
+    when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
+    when(mockBookRepository.save(any(Book.class))).thenReturn(testBook);
 
-        mvc.perform(put(API_BOOKS_1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(BOOK_CONTENT))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
-                .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
-                .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
-                .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
+    mvc.perform(put(API_BOOKS_1)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(BOOK_CONTENT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.author", is(testBook.getAuthor())))
+        .andExpect(jsonPath("$.genre", is(testBook.getGenre())))
+        .andExpect(jsonPath("$.publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$.isbn", is(testBook.getIsbn())));
 
-    }
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
-        when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
+    when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(put(API_BOOKS_1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(BOOK_CONTENT))
-                .andExpect(status().isNotFound());
-    }
+    mvc.perform(put(API_BOOKS_1)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(BOOK_CONTENT))
+        .andExpect(status().isNotFound());
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenUpdatedUserWithIdNotMismatch_thenThrowException() throws Exception {
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenUpdatedUserWithIdNotMismatch_thenThrowException() throws Exception {
 
-        mvc.perform(put(API_BOOKS_2)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(BOOK_CONTENT))
-                .andExpect(status().isBadRequest());
-    }
+    mvc.perform(put(API_BOOKS_2)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(BOOK_CONTENT))
+        .andExpect(status().isBadRequest());
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenDeleteUser_thenUserIsDeleted() throws Exception {
-        when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenDeleteUser_thenUserIsDeleted() throws Exception {
+    when(mockBookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
 
-        mvc.perform(delete(API_BOOKS_1)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+    mvc.perform(delete(API_BOOKS_1)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
 
-        Long ID_PATH_VARIABLE = 1L;
-        verify(mockBookRepository).deleteById(ID_PATH_VARIABLE);
+    Long ID_PATH_VARIABLE = 1L;
+    verify(mockBookRepository).deleteById(ID_PATH_VARIABLE);
 
-    }
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenDeleteUserNotExist_thenThrowException() throws Exception {
-        when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenDeleteUserNotExist_thenThrowException() throws Exception {
+    when(mockBookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        mvc.perform(delete(API_BOOKS_1)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
+    mvc.perform(delete(API_BOOKS_1)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
 
-    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
-    @Test
-    void whenGetUsersByBirthdateAndName_thenUsersReturn() throws Exception {
-        when(mockBookRepository
-            .findAllByPublisherAndGenreAndYear(
-                anyString(),
-                anyString(),
-                anyString()))
-            .thenReturn(bookList);
+  @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+  @Test
+  void whenGetUsersByBirthdateAndName_thenUsersReturn() throws Exception {
+    when(mockBookRepository
+        .findAllByPublisherAndGenreAndYear(
+            anyString(),
+            anyString(),
+            anyString()))
+        .thenReturn(bookList);
 
-        mvc.perform(get(API_BOOK_ADVANCE_METHOD)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(PASSWORD_CONTENT))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
-            .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
-    }
+    mvc.perform(get(API_BOOK_ADVANCE_METHOD)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(PASSWORD_CONTENT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
+        .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
+  }
 
 }
