@@ -25,4 +25,6 @@ public interface MessageSwagger {
     static final String RESOURCE_NOT_FOUND = "The resource you were trying to reach is not found";
     static final String INTERNAL_ERROR = "Internal Server Error";
 
+    static final String MESSAGE_NOT_NULL="Please check the Object supplied, its %s!";
+
 }
