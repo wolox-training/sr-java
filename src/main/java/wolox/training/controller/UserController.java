@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -236,6 +238,21 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(newPassword.getPassword()));
 
         return ResponseEntity.ok(userRepository.save(user));
+    }
+
+    @GetMapping("/me")
+    @ApiOperation(value = "get user logged in", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
+    public ResponseEntity<User> getUserSecurityContext() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        return ResponseEntity.ok(userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new));
     }
 
 }
