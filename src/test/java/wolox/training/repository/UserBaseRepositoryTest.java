@@ -22,7 +22,7 @@ class UserBaseRepositoryTest {
   EntityManager entityManager;
 
   @Autowired
-  UserBaseRepository userBaseRepository;
+  UserRepository userRepository;
 
   private User testUser;
 
@@ -34,7 +34,7 @@ class UserBaseRepositoryTest {
 
   @Test
   void whenSave_thenUserIsPersisted() {
-    User persistedUser = userBaseRepository.save(testUser);
+    User persistedUser = userRepository.save(testUser);
 
     assertThat(persistedUser.getUsername())
         .isEqualTo(testUser.getUsername());
@@ -53,12 +53,12 @@ class UserBaseRepositoryTest {
     testUser.setName(null);
 
     Assertions
-        .assertThrows(DataIntegrityViolationException.class, () -> userBaseRepository.save(testUser));
+        .assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(testUser));
   }
 
   @Test
   void whenGetAll_thenReturnUsers() {
-    assertThat(userBaseRepository.findAll().size() > 0).isTrue();
+    assertThat(userRepository.findAll().size() > 0).isTrue();
   }
 
   @Test
@@ -67,7 +67,7 @@ class UserBaseRepositoryTest {
     LocalDate dateEnd = LocalDate.parse("2021-03-20");
     String nameLike = "seb";
     assertThat(
-        userBaseRepository
+        userRepository
             .findAllByBirthdateBetweenAndNameContaining(dateStart, dateEnd, nameLike)
             .size() > 0).isTrue();
   }
