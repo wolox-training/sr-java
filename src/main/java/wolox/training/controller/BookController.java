@@ -8,12 +8,17 @@ import static wolox.training.constants.MessageSwagger.SUCCESS_GET_BOOK;
 import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_BOOK;
 import static wolox.training.constants.MessageSwagger.TAGS_BOOK;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +37,7 @@ import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.model.Book;
 import wolox.training.repository.BookRepository;
 import wolox.training.service.OpenLibraryService;
+import wolox.training.utils.PageableUtils;
 
 @RestController
 @RequestMapping("/api/books")
@@ -42,11 +48,17 @@ public class BookController {
 
   private final OpenLibraryService openLibraryService;
 
+  private final ObjectMapper objectMapper;
+
+  private final PageableUtils pageableUtils;
 
   @Autowired
-  public BookController(BookRepository bookRepository, OpenLibraryService openLibraryService) {
+  public BookController(BookRepository bookRepository, OpenLibraryService openLibraryService,
+      ObjectMapper objectMapper, PageableUtils pageableUtils) {
     this.bookRepository = bookRepository;
     this.openLibraryService = openLibraryService;
+    this.objectMapper = objectMapper;
+    this.pageableUtils = pageableUtils;
   }
 
   /**
@@ -55,22 +67,17 @@ public class BookController {
    * @return got {@link List<Book> }
    */
   @GetMapping
-  @ApiOperation(value = "return books", response = Book.class)
+  @ApiOperation(value = "return books", response = Book.class, responseContainer = "List")
   @ResponseStatus(HttpStatus.OK)
-  public List<Book> getAllFilters(
-      @RequestParam(value = "id", required = false) Long id,
-      @RequestParam(value = "author", required = false) String author,
-      @RequestParam(value = "genre", required = false) String genre,
-      @RequestParam(value = "isbn", required = false) String isbn,
-      @RequestParam(value = "pages", required = false) String pages,
-      @RequestParam(value = "publisher", required = false) String publisher,
-      @RequestParam(value = "year", required = false) String year,
-      @RequestParam(value = "title", required = false) String title,
-      @RequestParam(value = "subtitle", required = false) String subtitle
-  ) {
-    return bookRepository.findAllFilters(
-        publisher, genre, year, author, title, subtitle, isbn, pages, id
-    );
+  public Iterable<Book> getAllFilters(@RequestParam Map<String, String> params) {
+    Pageable pages = pageableUtils.paramsToPage(params);
+    if (params.size() == 0) {
+      return bookRepository.findAll(pages);
+    }
+    Book bookParams = objectMapper.convertValue(params, Book.class);
+    ExampleMatcher bookMatcherExample = ExampleMatcher.matching();
+    Example<Book> bookExample = Example.of(bookParams, bookMatcherExample);
+    return bookRepository.findAll(bookExample, pages);
   }
 
 
@@ -198,4 +205,6 @@ public class BookController {
     return ResponseEntity
         .ok(bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year));
   }
+
+
 }
