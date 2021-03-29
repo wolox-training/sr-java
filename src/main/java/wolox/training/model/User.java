@@ -21,6 +21,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class User {
     @JoinTable(name = "user_book",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"))
-    private List<Book> books;
+    private List<Book> books = new ArrayList<>();
 
     public List<Book> getBooks() {
         return Collections.unmodifiableList(books);
