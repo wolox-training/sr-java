@@ -16,13 +16,13 @@ import wolox.training.model.User;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class UserRepositoryTest {
+class UserBaseRepositoryTest {
 
   @Autowired
   EntityManager entityManager;
 
   @Autowired
-  UserRepository userRepository;
+  UserBaseRepository userBaseRepository;
 
   private User testUser;
 
@@ -34,7 +34,7 @@ class UserRepositoryTest {
 
   @Test
   void whenSave_thenUserIsPersisted() {
-    User persistedUser = userRepository.save(testUser);
+    User persistedUser = userBaseRepository.save(testUser);
 
     assertThat(persistedUser.getUsername())
         .isEqualTo(testUser.getUsername());
@@ -53,12 +53,12 @@ class UserRepositoryTest {
     testUser.setName(null);
 
     Assertions
-        .assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(testUser));
+        .assertThrows(DataIntegrityViolationException.class, () -> userBaseRepository.save(testUser));
   }
 
   @Test
   void whenGetAll_thenReturnUsers() {
-    assertThat(userRepository.findAll().size() > 0).isTrue();
+    assertThat(userBaseRepository.findAll().size() > 0).isTrue();
   }
 
   @Test
@@ -67,7 +67,7 @@ class UserRepositoryTest {
     LocalDate dateEnd = LocalDate.parse("2021-03-20");
     String nameLike = "seb";
     assertThat(
-        userRepository
+        userBaseRepository
             .findAllByBirthdateBetweenAndNameContaining(dateStart, dateEnd, nameLike)
             .size() > 0).isTrue();
   }
