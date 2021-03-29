@@ -45,7 +45,7 @@ import wolox.training.factory.BookFactory;
 import wolox.training.factory.UserFactory;
 import wolox.training.model.Book;
 import wolox.training.model.User;
-import wolox.training.repository.UserRepository;
+import wolox.training.repository.UserBaseRepository;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -64,7 +64,7 @@ class UserControllerTest {
   private MockMvc mvc;
 
   @MockBean
-  private UserRepository mockUserRepository;
+  private UserBaseRepository mockUserBaseRepository;
 
   @BeforeEach
   void setUp() {
@@ -78,9 +78,9 @@ class UserControllerTest {
   @Test
   void whenFindAll_thenUsersIsReturned() throws Exception {
     Page<User> pagedUsers = new PageImpl(userList);
-    when(mockUserRepository.findAll(any(Example.class), any(Pageable.class)))
+    when(mockUserBaseRepository.findAll(any(Example.class), any(Pageable.class)))
         .thenReturn(pagedUsers);
-    when(mockUserRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
+    when(mockUserBaseRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
 
     mvc.perform(get(API_USERS)
         .contentType(MediaType.APPLICATION_JSON))
@@ -94,9 +94,9 @@ class UserControllerTest {
   @Test
   void whenFindAll_thenNoUserExist() throws Exception {
     Page<User> pagedUsers = new PageImpl(Collections.emptyList());
-    when(mockUserRepository.findAll(any(Example.class), any(Pageable.class)))
+    when(mockUserBaseRepository.findAll(any(Example.class), any(Pageable.class)))
         .thenReturn(pagedUsers);
-    when(mockUserRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
+    when(mockUserBaseRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
     mvc.perform(get(API_USERS)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -106,7 +106,7 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindById_thenUserIsReturned() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
     mvc.perform(get(API_USERS_1)
         .contentType(MediaType.APPLICATION_JSON))
@@ -118,7 +118,7 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenFindById_thenNotFound() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(get(API_USERS_2)
         .contentType(MediaType.APPLICATION_JSON))
@@ -127,7 +127,7 @@ class UserControllerTest {
 
   @Test
   void whenCreateUser_thenUserIsPersisted() throws Exception {
-    when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
+    when(mockUserBaseRepository.save(any(User.class))).thenReturn(testUser);
 
     mvc.perform(post(API_USERS)
         .contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +139,7 @@ class UserControllerTest {
 
   @Test
   void whenCreateUserWithId_thenThrowException() throws Exception {
-    when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
+    when(mockUserBaseRepository.save(any(User.class))).thenReturn(testUser);
 
     mvc.perform(post(API_USERS)
         .contentType(MediaType.APPLICATION_JSON)
@@ -150,8 +150,8 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenUpdatedUser_thenUserIsPersisted() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-    when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+    when(mockUserBaseRepository.save(any(User.class))).thenReturn(testUser);
 
     mvc.perform(put(API_USERS_1)
         .contentType(MediaType.APPLICATION_JSON)
@@ -165,7 +165,7 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenUpdatedUserWithIdNotExist_thenThrowException() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(put(API_USERS_1)
         .contentType(MediaType.APPLICATION_JSON)
@@ -186,21 +186,21 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenDeleteUser_thenUserIsDeleted() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
     mvc.perform(delete(API_USERS_1)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     Long ID_PATH_VARIABLE = 1L;
-    verify(mockUserRepository).deleteById(ID_PATH_VARIABLE);
+    verify(mockUserBaseRepository).deleteById(ID_PATH_VARIABLE);
 
   }
 
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenDeleteUserNotExist_thenThrowException() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.empty());
 
     mvc.perform(delete(API_USERS_1)
         .contentType(MediaType.APPLICATION_JSON))
@@ -210,7 +210,7 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenChangePasswordNotMatch_thenThrowException() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
 
     mvc.perform(patch(API_USERS_2_PASSWORD)
         .contentType(MediaType.APPLICATION_JSON)
@@ -221,8 +221,8 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenChangePassword_thenPasswordIsPersisted() throws Exception {
-    when(mockUserRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-    when(mockUserRepository.save(any(User.class))).thenReturn(testUser);
+    when(mockUserBaseRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+    when(mockUserBaseRepository.save(any(User.class))).thenReturn(testUser);
 
     mvc.perform(patch(API_USERS_2_PASSWORD)
         .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +236,7 @@ class UserControllerTest {
   @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
   @Test
   void whenGetUsersByBirthdateAndName_thenUsersReturn() throws Exception {
-    when(mockUserRepository
+    when(mockUserBaseRepository
         .findAllByBirthdateBetweenAndNameContaining(
             any(LocalDate.class),
             any(LocalDate.class),
