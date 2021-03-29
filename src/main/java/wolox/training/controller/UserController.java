@@ -266,9 +266,9 @@ public class UserController {
       @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
       @ApiResponse(code = 500, message = INTERNAL_ERROR)})
   public ResponseEntity<List<User>> getUsersByBirthdateAndName(
-      @RequestParam("date_start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
-      @RequestParam("date_end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
-      @RequestParam("name_like") String nameCharacters) {
+      @RequestParam(value = "date_start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+      @RequestParam(value = "date_end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
+      @RequestParam(value = "name_like", required = false) String nameCharacters) {
 
     return ResponseEntity.ok(userRepository
         .findAllByBirthdateBetweenAndNameContaining(dateStart, dateEnd, nameCharacters));
