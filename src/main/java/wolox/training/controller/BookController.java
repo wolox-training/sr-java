@@ -172,4 +172,17 @@ public class BookController {
                         .body(bookRepository.save(openLibraryService.findBookByIsbn(isbn))
                         ));
     }
+
+    @GetMapping("/")
+    @ApiOperation(value = "Giving an publisher,genre and year, return the books", response = Book.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SUCCESS_GET_BOOK),
+            @ApiResponse(code = 400, message = SOMETHING_WRONG),
+            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
+            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
+    public ResponseEntity<List<Book>> findByPublisherAndGenreAndYear(@RequestParam("publisher") String publisher,
+                                                                     @RequestParam("genre") String genre,
+                                                                     @RequestParam("year") String year) {
+        return ResponseEntity.ok(bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year));
+    }
 }

@@ -1,5 +1,6 @@
 package wolox.training.controller;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -36,6 +38,7 @@ import static wolox.training.factory.DataTestConstants.AUTH_PASSWORD;
 import static wolox.training.factory.DataTestConstants.AUTH_USERNAME;
 import static wolox.training.factory.DataTestConstants.BOOK_CONTENT;
 import static wolox.training.factory.DataTestConstants.BOOK_CONTENT_WITHOUT_ID;
+import static wolox.training.factory.DataTestConstants.PASSWORD_CONTENT;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -46,6 +49,7 @@ class BookControllerTest {
     public static final String API_BOOKS_AUTHOR = "/api/books/author?author=Dan Brown";
     public static final String API_BOOKS_1 = "/api/books/1";
     public static final String API_BOOKS_2 = "/api/books/2";
+    public static final String API_BOOK_ADVANCE_METHOD = "/api/books/?publisher=Zhizhong Cai&genre=terror&year=1994";
     private final List<Book> bookList = new ArrayList<>();
 
     private Book testBook;
@@ -185,6 +189,25 @@ class BookControllerTest {
         mvc.perform(delete(API_BOOKS_1)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @WithMockUser(username = AUTH_USERNAME, password = AUTH_PASSWORD)
+    @Test
+    void whenGetUsersByBirthdateAndName_thenUsersReturn() throws Exception {
+        when(mockBookRepository
+            .findAllByPublisherAndGenreAndYear(
+                anyString(),
+                anyString(),
+                anyString()))
+            .thenReturn(bookList);
+
+        mvc.perform(get(API_BOOK_ADVANCE_METHOD)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(PASSWORD_CONTENT))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].publisher", is(testBook.getPublisher())))
+            .andExpect(jsonPath("$[0].isbn", is(testBook.getIsbn())));
     }
 
 }
