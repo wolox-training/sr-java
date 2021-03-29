@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 import static wolox.training.factory.DataTestConstants.BIRTHDATE;
 import static wolox.training.factory.DataTestConstants.NAME;
-import static wolox.training.factory.DataTestConstants.PASSWORD;
 import static wolox.training.factory.DataTestConstants.USERNAME;
 
 public class UserFactory {
@@ -16,13 +15,11 @@ public class UserFactory {
     private String username;
     private String name;
     private LocalDate birthdate;
-    private String password;
 
     public UserFactory() {
         this.id = null;
         this.name = NAME;
         this.username = USERNAME;
-        this.password = PASSWORD;
         this.birthdate = LocalDate.parse(BIRTHDATE);
     }
 
@@ -30,7 +27,6 @@ public class UserFactory {
         User user = new User();
         user.setId(this.id);
         user.setName(this.name);
-        user.setPassword(this.password);
         user.setUsername(this.username);
         user.setBirthdate(this.birthdate);
 

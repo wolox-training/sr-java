@@ -1,24 +1,12 @@
 package wolox.training.controller;
 
-import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
-import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
-import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
-import static wolox.training.constants.MessageSwagger.SUCCESS_ADD_BOOKS_USER;
-import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_USER;
-import static wolox.training.constants.MessageSwagger.SUCCESS_GET_USER;
-import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
-import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
-import static wolox.training.constants.MessageSwagger.TAGS_USER;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,11 +21,21 @@ import wolox.training.exceptions.BookNotFoundException;
 import wolox.training.exceptions.UserException;
 import wolox.training.exceptions.UserIdMismatchException;
 import wolox.training.exceptions.UserNotFoundException;
-import wolox.training.exceptions.UserPasswordsMismatchException;
 import wolox.training.model.User;
-import wolox.training.model.dto.PasswordDto;
 import wolox.training.repository.BookRepository;
 import wolox.training.repository.UserRepository;
+
+import java.util.List;
+
+import static wolox.training.constants.MessageSwagger.INTERNAL_ERROR;
+import static wolox.training.constants.MessageSwagger.RESOURCE_NOT_FOUND;
+import static wolox.training.constants.MessageSwagger.SOMETHING_WRONG;
+import static wolox.training.constants.MessageSwagger.SUCCESS_ADD_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_CREATE_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_GET_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_REMOVE_BOOKS_USER;
+import static wolox.training.constants.MessageSwagger.SUCCESS_UPDATE_USER;
+import static wolox.training.constants.MessageSwagger.TAGS_USER;
 
 @RestController
 @RequestMapping("/api/users")
@@ -48,14 +46,10 @@ public class UserController {
 
     private final BookRepository bookRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     @Autowired
-    public UserController(UserRepository userRepository, BookRepository bookRepository,
-            PasswordEncoder passwordEncoder) {
+    public UserController(UserRepository userRepository, BookRepository bookRepository) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -105,8 +99,6 @@ public class UserController {
         if (user.getId() != null) {
             throw new UserException("for the creation request the id field must be null");
         }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userRepository.save(user));
     }
@@ -134,10 +126,8 @@ public class UserController {
                 throw new UserIdMismatchException();
             }
 
-            User userDB = userRepository.findById(id)
+            userRepository.findById(id)
                     .orElseThrow(UserNotFoundException::new);
-
-            user.setPassword(userDB.getPassword());
 
             return ResponseEntity.ok(userRepository.save(user));
         } catch (IllegalArgumentException e) {
@@ -207,41 +197,6 @@ public class UserController {
         user.removeBook(idBook);
         userRepository.save(user);
         return ResponseEntity.ok(user);
-    }
-
-    /**
-     * This method updates an {@link User} with the following parameters
-     *
-     * @param id:          Identifier of user (long)
-     * @param newPassword: Representation the password confirmation like object (PasswordDto)
-     * @return updated {@link ResponseEntity<User>}.
-     * @throws UserNotFoundException          if user not found on database
-     * @throws UserPasswordsMismatchException if password no math with verifiedPassword
-     *                                        (PasswordDto)
-     * @throws UserException                  if the Object user contain attr with values illegals
-     */
-    @PatchMapping("/{id}/change_password")
-    @ApiOperation(value = "change password", response = User.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SUCCESS_UPDATE_USER),
-            @ApiResponse(code = 400, message = SOMETHING_WRONG),
-            @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND),
-            @ApiResponse(code = 500, message = INTERNAL_ERROR)})
-    public ResponseEntity<User> changePassword(@PathVariable long id,
-            @RequestBody PasswordDto newPassword) {
-
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-
-        if (!passwordEncoder.matches(newPassword.getOldPassword(), user.getPassword())) {
-            throw new UserPasswordsMismatchException("the old password is wrong");
-        }
-        if (!newPassword.validatePasswordMismatch()) {
-            throw new UserPasswordsMismatchException();
-        }
-
-        user.setPassword(passwordEncoder.encode(newPassword.getPassword()));
-
-        return ResponseEntity.ok(userRepository.save(user));
     }
 
 }
